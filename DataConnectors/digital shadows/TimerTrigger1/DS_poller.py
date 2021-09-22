@@ -7,10 +7,10 @@ import json
 class poller:
     log_type = 'InALogs'                    #custom logs name
 
-    def __init__(self, ds_id, ds_key, secret, as_id, as_key):
+    def __init__(self, ds_id, ds_key, secret, as_id, as_key, connection_string):
         self.DS_obj = DS_api.api(ds_id, ds_key, secret)
         self.AS_obj = AS_api.logs_api(as_id, as_key)
-        self.date = state_serializer.state()
+        self.date = state_serializer.state(connection_string)
         self.date.get_last_updated()
 
     def get_new_time(self, response):
