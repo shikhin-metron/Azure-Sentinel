@@ -7,10 +7,10 @@ import json
 class poller:
     log_type = 'InALogs'                    #custom logs name
 
-    def __init__(self, ds_id, ds_key, secret, as_id, as_key, connection_string):
+    def __init__(self, ds_id, ds_key, secret, as_id, as_key):
         self.DS_obj = DS_api.api(ds_id, ds_key, secret)
         self.AS_obj = AS_api.logs_api(as_id, as_key)
-        self.date = state_serializer.state(connection_string)
+        self.date = state_serializer.state()
         self.date.get_last_updated()
 
     def get_new_time(self, response):
@@ -50,13 +50,13 @@ class poller:
                     self.AS_obj.post_data(json.dumps(response.json()), self.log_type)
                     
                     #handling time
-                    self.get_new_time(response)
+                    #self.get_new_time(response)
 
                 if(item['source']['alert-id'] is not None):
                     response = self.DS_obj.get_alerts(item['source']['alert-id'])
                     self.AS_obj.post_data(json.dumps(response.json()), self.log_type)
                     #handling time
-                    self.get_new_time(response)
+                    #self.get_new_time(response)
 
         
-        self.date.update_new_time()
+        #self.date.update_new_time()
