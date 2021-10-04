@@ -2,8 +2,6 @@
 import requests
 import base64
 
-from . import constant
-
 
 class api:
 
