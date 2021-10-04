@@ -2,8 +2,6 @@
 import requests
 import base64
 
-from . import constant
-
 
 class api:
 
@@ -12,7 +10,7 @@ class api:
             constructer initializes the DS creds and creates passkey
         """
 
-        self.url = uri
+        self.url = "https://" + str(uri)
         passkey = key + ":" + secret
         self.id = id
         self.b64val = base64.b64encode(bytes(passkey, 'utf-8')).decode("ascii")
