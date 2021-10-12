@@ -36,12 +36,17 @@ class poller:
                     
                 #sending data to sentinel
                 for item in item_data:
+                    status ={'status':item['state']}
                     if(item['source']['incident-id'] is not None):
                         response = self.DS_obj.get_incidents(item['source']['incident-id'])
-                        self.AS_obj.post_data(json.dumps(response.json()), constant.LOG_NAME)
+                        json_obj = response.json()
+                        json_obj.update(status)
+                        self.AS_obj.post_data(json.dumps(json_obj), constant.LOG_NAME)
 
                     if(item['source']['alert-id'] is not None):
                         response = self.DS_obj.get_alerts(item['source']['alert-id'])
-                        self.AS_obj.post_data(json.dumps(response.json()), constant.LOG_NAME)
+                        json_obj = response.json()
+                        json_obj.update(status)
+                        self.AS_obj.post_data(json.dumps(json_obj), constant.LOG_NAME)
         except ValueError:
             logging.info("JSON is of invalid format")
