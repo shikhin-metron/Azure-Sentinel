@@ -53,7 +53,7 @@ class poller:
                 #logging.info(event)
                 triages_str = triages_str + "&id=" + str(event['triage-item-id'])
 
-        except ValueError:
+        except (ValueError, KeyError):
             logging.info("JSON is of invalid format")
 
         
