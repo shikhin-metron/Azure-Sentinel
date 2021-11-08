@@ -51,7 +51,8 @@ class poller:
             triages_str = str(event_data[0]['triage-item-id'])
             for event in event_data:
                 #logging.info(event)
-                triages_str = triages_str + "&id=" + str(event['triage-item-id'])
+                if(event is not None):
+                    triages_str = triages_str + "&id=" + str(event['triage-item-id'])
 
         except ValueError:
             logging.info("JSON is of invalid format")
