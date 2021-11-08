@@ -47,6 +47,7 @@ class poller:
         try:
             event_dataJSON = self.DS_obj.get_triage_events(str(self.before_time), str(self.after_time))
             event_data = json.loads(event_dataJSON)
+            logging.info(event_data)
             triages_str = str(event_data[0]['triage-item-id'])
             for event in event_data:
                 #logging.info(event)
