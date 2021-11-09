@@ -47,18 +47,20 @@ class poller:
         try:
             event_dataJSON = self.DS_obj.get_triage_events(str(self.before_time), str(self.after_time))
             event_data = json.loads(event_dataJSON)
-            logging.info(event_data)
+            
             triages_str = str(event_data[0]['triage-item-id'])
             for event in event_data:
                 #logging.info(event)
                 if(event is not None):
                     triages_str = triages_str + "&id=" + str(event['triage-item-id'])
 
-        except ValueError:
-            logging.info("JSON is of invalid format")
+        except (ValueError, IndexError):
+            logging.info("JSON is of invalid format or no new incidents or alerts are found")
 
-        
-        item_data = json.loads(self.DS_obj.get_triage_items(triages_str))
+        try:
+            item_data = json.loads(self.DS_obj.get_triage_items(triages_str))
+        except UnboundLocalError:
+            logging.info("No new incidents or alerts found")
                     
         try:
             #sending data to sentinel
