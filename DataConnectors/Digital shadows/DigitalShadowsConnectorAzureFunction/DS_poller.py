@@ -73,5 +73,5 @@ class poller:
                     response = self.DS_obj.get_alerts(item['source']['alert-id'])
                     self.post_azure(response, item)
 
-        except (KeyError, TypeError):
-            logging.info("Key error or type error has occured")
+        except (KeyError, TypeError, UnboundLocalError):
+            logging.info("Key error or type error has occured or no new incidents or alerts are found")
