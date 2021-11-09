@@ -21,9 +21,8 @@ class poller:
         logging.info("From time: %s", self.after_time)
         logging.info("to time: %s", self.before_time)
 
-    def post_comments(self, response, comment):
-        json_obj = json.loads(response.text)
-        self.AS_obj.post_data(json.dumps((json_obj[0])), constant.COMMENTS_LOG_NAME)
+    def post_comments(self, comment):
+        self.AS_obj.post_data(json.dumps(comment), constant.COMMENTS_LOG_NAME)
 
 
     def post_azure(self, response, item):
@@ -59,6 +58,7 @@ class poller:
 
         try:
             item_data = json.loads(self.DS_obj.get_triage_items(triages_str))
+            comments = json.loads(self.DS_obj.get_triage_comments(triages_str))
         except UnboundLocalError:
             logging.info("No new incidents or alerts found")
                     
@@ -72,6 +72,10 @@ class poller:
                 elif(item['source']['alert-id'] is not None):
                     response = self.DS_obj.get_alerts(item['source']['alert-id'])
                     self.post_azure(response, item)
+            
+            for c in comments:
+                self.post_comments(c)
+
 
         except (KeyError, TypeError, UnboundLocalError):
             logging.info("Key error or type error has occured or no new incidents or alerts are found")
