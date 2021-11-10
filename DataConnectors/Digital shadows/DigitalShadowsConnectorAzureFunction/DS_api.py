@@ -45,20 +45,14 @@ class api:
         response = requests.get(triage_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
         return response.text
 
-    def get_triage_items(self, item_id_str):
+    def get_triage_items(self, triage_ids):
         """  
             gets triage items from the triage events
         """
-        
-        items_url = self.url + "triage-items?id=" + str(item_id_str)
-        response = requests.get(items_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
-        return response.text
+        item_id_str = triage_ids[0]
+        for ele in triage_ids[1:]:
+            item_id_str = item_id_str + "&id=" + ele
 
-    def get_triage_comments(self, item_id_str):
-        """  
-            gets triage comments from the triage items
-        """
-        
-        items_url = self.url + "triage-item-comments?id=" + str(item_id_str)
+        items_url = self.url + "triage-items?id=" + item_id_str
         response = requests.get(items_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
         return response.text
