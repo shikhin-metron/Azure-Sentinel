@@ -44,7 +44,7 @@ class poller:
             
             for event in event_data:
                 if(event is not None):
-                    triage_id.append(event_data[0]['triage-item-id'])
+                    triage_id.append(event['triage-item-id'])
 
             
         except (ValueError, IndexError, UnboundLocalError):
