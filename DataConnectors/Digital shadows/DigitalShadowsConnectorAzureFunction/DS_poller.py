@@ -37,19 +37,21 @@ class poller:
         """
             getting the incident and alert data from digital shadows
         """
+        triage_id = []
         try:
             event_dataJSON = self.DS_obj.get_triage_events(str(self.before_time), str(self.after_time))
             event_data = json.loads(event_dataJSON)
-            triage_id = []
+            
             for event in event_data:
                 if(event is not None):
                     triage_id.append(event_data[0]['triage-item-id'])
 
-            item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
+            
         except (ValueError, IndexError, UnboundLocalError):
             logging.info(event_dataJSON)
             logging.info("JSON is of invalid format or no new incidents or alerts are found")
         
+        item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
         return item_data
 
     def poll(self):
