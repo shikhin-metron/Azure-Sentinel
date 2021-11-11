@@ -54,6 +54,6 @@ class api:
         for ele in triage_ids[1:]:
             item_id_str = item_id_str + "&id=" + ele
 
-        items_url = self.url + "triage-items?id=" + item_id_str
+        items_url = self.url + "triage-items?limit=1000&id=" + item_id_str
         response = requests.get(items_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
         return response.text
