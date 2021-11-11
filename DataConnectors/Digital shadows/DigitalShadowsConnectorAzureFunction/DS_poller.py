@@ -52,8 +52,6 @@ class poller:
             logging.info("JSON is of invalid format or no new incidents or alerts are found")
         
         item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
-        print("all the triage items json\n")
-        print(item_data)
         return item_data
 
     def poll(self):

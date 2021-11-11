@@ -5,14 +5,14 @@ from . import DS_poller
 import azure.functions as func
 import os
 
-account_id = os.environ['ID']
-customer_id = os.environ['WID']
-shared_key = os.environ['WKEY']
-key = os.environ['KEY']
-secret = os.environ['SECRET']
-connection_string = os.environ['STORE']
-historical_days = 10
-url = os.environ['LIVEURI']
+account_id = os.environ['digitalshadowsAccountID']
+customer_id = os.environ['WorkspaceID']
+shared_key = os.environ['WorkspaceKey']
+key = os.environ['digitalshadowsKey']
+secret = os.environ['digitalshadowsSecret']
+connection_string = os.environ['AzureWebJobsStorage']
+historical_days = os.environ['historicaldays']
+url = os.environ['digitalshadowsUrl']
 
 
 def main(mytimer: func.TimerRequest) -> None:
