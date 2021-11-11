@@ -44,7 +44,7 @@ class poller:
             
             for event in event_data:
                 if(event is not None):
-                    triage_id.append(event_data[0]['triage-item-id'])
+                    triage_id.append(event['triage-item-id'])
 
             
         except (ValueError, IndexError, UnboundLocalError):
@@ -52,6 +52,8 @@ class poller:
             logging.info("JSON is of invalid format or no new incidents or alerts are found")
         
         item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
+        print("all the triage items json\n")
+        print(item_data)
         return item_data
 
     def poll(self):
