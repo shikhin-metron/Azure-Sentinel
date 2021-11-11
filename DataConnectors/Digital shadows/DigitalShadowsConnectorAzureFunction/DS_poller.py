@@ -41,7 +41,7 @@ class poller:
         try:
             event_dataJSON = self.DS_obj.get_triage_events(str(self.before_time), str(self.after_time))
             event_data = json.loads(event_dataJSON)
-            
+            logging.info("total number of events are " + str(len(event_data)))
             for event in event_data:
                 if(event is not None):
                     triage_id.append(event['triage-item-id'])
@@ -60,10 +60,11 @@ class poller:
             makes api calls in following fashion:
             triage-events --> triage-items --> incidents and alerts 
         """
-        item_data = self.get_data()
                     
         try:
             #sending data to sentinel
+            item_data = self.get_data()
+            logging.info("total number of items are " + str(len(item_data)))
             for item in item_data:
                 if(item['source']['incident-id'] is not None):
                     response = self.DS_obj.get_incidents(item['source']['incident-id'])
@@ -74,6 +75,6 @@ class poller:
                     self.post_azure(response, item)
 
 
-        except (KeyError, TypeError, UnboundLocalError):
+        except (KeyError, TypeError, UnboundLocalError, IndexError):
             logging.info(item_data)
             logging.info("Key error or type error has occured or no new incidents or alerts are found")

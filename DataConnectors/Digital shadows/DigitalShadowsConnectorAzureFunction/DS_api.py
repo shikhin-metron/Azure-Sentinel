@@ -49,6 +49,7 @@ class api:
         """  
             gets triage items from the triage events
         """
+
         item_id_str = triage_ids[0]
         for ele in triage_ids[1:]:
             item_id_str = item_id_str + "&id=" + ele
