@@ -27,10 +27,12 @@ class poller:
             posts to azure after appending triage information on it
         """
         json_obj = json.loads(response.text)
+        comment_data = json.loads(self.DS_obj.get_triage_comments(item['id']))
         json_obj[0]['status'] = item['state']
         json_obj[0]['triage_id'] = item['id']
         json_obj[0]['triage_raised_time'] = item['raised']
         json_obj[0]['triage_updated_time'] = item['updated']
+        json_obj[0]['comments'] = comment_data
         self.AS_obj.post_data(json.dumps((json_obj[0])), constant.LOG_NAME)
 
     def get_data(self):
@@ -48,10 +50,24 @@ class poller:
 
             
         except (ValueError, IndexError, UnboundLocalError):
-            logging.info(event_dataJSON)
+            
             logging.info("JSON is of invalid format or no new incidents or alerts are found")
         
         item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
+        if(len(triage_id) > 100):
+            i = 0
+            j = 1
+            size = len(triage_id)
+            item_data = []
+            while(i < size):
+                temp_item = json.loads(self.DS_obj.get_triage_items(triage_id[i:j*100]))
+                item_data = item_data + temp_item
+                logging.info("triage sets at a time: " + str(len(triage_id[i:j*100])))
+                j = j + 1
+                i = i + 100 
+        else:
+            item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
+            
         return item_data
 
     def poll(self):
@@ -76,5 +92,5 @@ class poller:
 
 
         except (KeyError, TypeError, UnboundLocalError, IndexError):
-            logging.info(item_data)
+            
             logging.info("Key error or type error has occured or no new incidents or alerts are found")
