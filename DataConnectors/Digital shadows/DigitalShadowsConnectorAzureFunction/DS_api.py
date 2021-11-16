@@ -1,5 +1,4 @@
 """ handles all DS api related functions """
-import logging
 import requests
 import base64
 from urllib.parse import urlparse
@@ -42,9 +41,8 @@ class api:
             send only the DS converted dates using state serializer functions to get triage events
         """
 
-        triage_url = self.url + "triage-item-events?event-created-before=" + str(before_date) + "&event-created-after=" +  str(after_date) + "&limit=1000"
+        triage_url = self.url + "triage-item-events?event-created-before=" + str(before_date) + "&event-created-after=" +  str(after_date)
         response = requests.get(triage_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
-        logging.info(response)
         return response.text
 
     def get_triage_items(self, triage_ids):
@@ -57,14 +55,5 @@ class api:
             item_id_str = item_id_str + "&id=" + ele
 
         items_url = self.url + "triage-items?limit=1000&id=" + item_id_str
-        response = requests.get(items_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
-        return response.text
-
-    def get_triage_comments(self, item_id):
-        """  
-            gets triage comments from the triage items
-        """
-
-        items_url = self.url + "triage-item-comments?id=" + str(item_id)
         response = requests.get(items_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
         return response.text
