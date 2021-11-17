@@ -81,7 +81,11 @@ class poller:
             #sending data to sentinel
             item_data = self.get_data()
             logging.info("total number of items are " + str(len(item_data)))
+            
             for item in item_data:
+                if(isinstance(item, list)):
+                    logging.info("list found")
+
                 if(item['source']['incident-id'] is not None):
                     response = self.DS_obj.get_incidents(item['source']['incident-id'])
                     self.post_azure(response, item)
