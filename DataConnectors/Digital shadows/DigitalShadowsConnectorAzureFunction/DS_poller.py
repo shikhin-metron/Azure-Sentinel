@@ -5,6 +5,7 @@ from . import AS_api
 from .state_serializer import State
 import json
 from . import constant
+from DigitalShadowsConnectorAzureFunction import state_serializer
 
 class poller:
 
@@ -15,11 +16,17 @@ class poller:
         
         self.DS_obj = DS_api.api(ds_id, ds_key, secret, url)
         self.AS_obj = AS_api.logs_api(as_id, as_key)
-        date = State(connection_string)
+        self.date = State(connection_string)
         logging.info("got inside the poller code")
-        self.after_time, self.before_time = date.get_last_polled_time(historical_days)
-        logging.info("From time: %s", self.after_time)
-        logging.info("to time: %s", self.before_time)
+        self.event = self.date.get_last_event(historical_days)
+        if(isinstance(self.event, tuple)):
+            self.after_time = self.event[0]
+            self.before_time = self.event[1]
+            logging.info("From time: %s", self.after_time)
+            logging.info("to time: %s", self.before_time)
+        else:
+            logging.info("Polling from event number " + str(self.event))
+
 
 
     def post_azure(self, response, item):
@@ -41,10 +48,19 @@ class poller:
         """
         triage_id = []
         try:
-            event_dataJSON = self.DS_obj.get_triage_events(str(self.before_time), str(self.after_time))
-            event_data = json.loads(event_dataJSON)
+            if(isinstance(self.event, int)):
+                event_dataJSON = self.DS_obj.get_triage_events_by_num(self.event)
+                event_data = json.loads(event_dataJSON)
+            else:
+                event_dataJSON = self.DS_obj.get_triage_events(str(self.before_time), str(self.after_time))
+                event_data = json.loads(event_dataJSON)
+                event_num = int(event_data[0]['event-num'])
+                self.date.post_event(event_num + 20)
+
+            
             logging.info("total number of events are " + str(len(event_data)))
-            for event in event_data:
+            
+            for event in event_data[:20]:
                 if(event is not None):
                     triage_id.append(event['triage-item-id'])
 
@@ -54,20 +70,7 @@ class poller:
             logging.info("JSON is of invalid format or no new incidents or alerts are found")
         
         item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
-        if(len(triage_id) > 100):
-            i = 0
-            j = 1
-            size = len(triage_id)
-            item_data = []
-            while(i < size):
-                temp_item = json.loads(self.DS_obj.get_triage_items(triage_id[i:j*100]))
-                item_data = item_data + temp_item
-                logging.info("triage sets at a time: " + str(len(triage_id[i:j*100])))
-                j = j + 1
-                i = i + 100 
-        else:
-            item_data = json.loads(self.DS_obj.get_triage_items(triage_id))
-            
+        
         return item_data
 
     def poll(self):
@@ -81,11 +84,7 @@ class poller:
             #sending data to sentinel
             item_data = self.get_data()
             logging.info("total number of items are " + str(len(item_data)))
-            
             for item in item_data:
-                if(isinstance(item, list)):
-                    logging.info("list found")
-
                 if(item['source']['incident-id'] is not None):
                     response = self.DS_obj.get_incidents(item['source']['incident-id'])
                     self.post_azure(response, item)
