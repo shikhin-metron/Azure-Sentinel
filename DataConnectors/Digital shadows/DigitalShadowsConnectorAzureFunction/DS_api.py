@@ -42,7 +42,7 @@ class api:
             send only the DS converted dates using state serializer functions to get triage events
         """
 
-        triage_url = self.url + "triage-item-events?event-created-before=" + str(before_date) + "&event-created-after=" +  str(after_date) + "&limit=1000"
+        triage_url = self.url + "triage-item-events?event-created-before=" + str(before_date) + "&event-created-after=" +  str(after_date)
         response = requests.get(triage_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
         logging.info(response)
         return response.text
@@ -67,4 +67,14 @@ class api:
 
         items_url = self.url + "triage-item-comments?id=" + str(item_id)
         response = requests.get(items_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
+        return response.text
+    
+    def get_triage_events_by_num(self, event):
+        """
+            gets triage events by number
+        """
+        event = event - 1
+        triage_url = self.url + "triage-item-events?limit=20&event-num-after=" + str(event)
+        response = requests.get(triage_url, headers={"Authorization": "Basic %s" % self.b64val, "searchlight-account-id": "%s" % self.id})
+        logging.info(response)
         return response.text
