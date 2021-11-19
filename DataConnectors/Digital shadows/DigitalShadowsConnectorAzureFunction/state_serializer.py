@@ -87,7 +87,6 @@ class State:
         event = None
         try:
             event = int(self.get_event())
-            self.post_event(event + 20)
         except:
             event = self.get_last_polled_time(historical_days)
         
