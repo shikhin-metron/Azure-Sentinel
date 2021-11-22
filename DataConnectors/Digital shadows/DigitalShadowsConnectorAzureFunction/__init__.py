@@ -5,23 +5,15 @@ from . import DS_poller
 import azure.functions as func
 import os
 
-''' account_id = os.environ['digitalshadowsAccountID']
+account_id = os.environ['digitalshadowsAccountID']
 customer_id = os.environ['WorkspaceID']
 shared_key = os.environ['WorkspaceKey']
 key = os.environ['digitalshadowsKey']
 secret = os.environ['digitalshadowsSecret']
 connection_string = os.environ['AzureWebJobsStorage']
 historical_days = os.environ['historicaldays']
-url = os.environ['digitalshadowsUrl'] '''
+url = os.environ['digitalshadowsUrl']
 
-account_id = os.environ['ID']
-customer_id = os.environ['WID']
-shared_key = os.environ['WKEY']
-key = os.environ['KEY']
-secret = os.environ['SECRET']
-connection_string = os.environ['STORE']
-historical_days = 5
-url = os.environ['LIVEURI']
 
 def main(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
