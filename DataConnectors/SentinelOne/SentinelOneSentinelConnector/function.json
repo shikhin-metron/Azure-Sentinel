@@ -5,6 +5,7 @@
       "name": "mytimer",
       "type": "timerTrigger",
       "direction": "in",
+      "runOnStartup": true,
       "schedule": "0 */10 * * * *"
     }
   ]

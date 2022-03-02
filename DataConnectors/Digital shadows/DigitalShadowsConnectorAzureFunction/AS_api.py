@@ -6,6 +6,8 @@ import hmac
 import hashlib
 import logging
 
+logger = logging.getLogger("AS_api")
+
 class logs_api:
     """ 
     class for log analytics api 
@@ -55,11 +57,11 @@ class logs_api:
         }
 
         response = requests.post(uri,data=body, headers=headers)
-        print(response.text)
+        
         if (response.status_code >= 200 and response.status_code <= 299):
-            logging.info('Accepted')
+            logger.info('Accepted')
         else:
-            logging.info("Response code: {}".format(response.status_code))
+            logger.info("Response code: {}".format(response.status_code))
 
 
             

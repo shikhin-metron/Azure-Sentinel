@@ -7,6 +7,8 @@ from azure.storage.fileshare import ShareFileClient
 from azure.core.exceptions import ResourceNotFoundError
 from . import constant
 
+logger = logging.getLogger("state_serializer")
+
 class State:
     def __init__(self, connection_string, share_name = constant.SHARE_NAME, file_path = constant.FILE_PATH):
         """ 
@@ -43,7 +45,7 @@ class State:
             posts the new time to azure file share file, 
             from which it will poll next time
         """
-        logging.info(str(marker_text) + " event number stored now")
+        logger.info(str(marker_text) + " event number stored now")
         try:
             self.file_event_cli.upload_file(str(marker_text))
         except ResourceNotFoundError:
@@ -73,9 +75,9 @@ class State:
         current_time = datetime.utcnow() - timedelta(minutes=constant.MINUTE)
         past_time = self.get()
         if past_time is not None:
-            logging.info("The last time point is: {}".format(past_time))
+            logger.info("The last time point is: {}".format(past_time))
         else:
-            logging.info("There is no last time point, trying to get events from last " + str(day) + " days.")
+            logger.info("There is no last time point, trying to get events from last " + str(day) + " days.")
             past_time = (current_time - timedelta(days=day)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
         self.post(current_time.strftime("%Y-%m-%dT%H:%M:%S.000Z"))
         return (past_time, current_time.strftime("%Y-%m-%dT%H:%M:%S.000Z"))

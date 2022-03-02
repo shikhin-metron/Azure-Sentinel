@@ -11,7 +11,7 @@ shared_key = os.environ['WKEY']
 key = os.environ['KEY']
 secret = os.environ['SECRET']
 connection_string = os.environ['STORE']
-historical_days = 20
+historical_days = 50
 url = os.environ['LIVEURI']
 
 
