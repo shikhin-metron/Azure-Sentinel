@@ -6,7 +6,7 @@ This folder contains the Azure function time trigger code for Digital Shadows-Az
 
 ## Folders
 
-1. `Digital shadows/` - This contains the package, requirements, ARM JSON file, connector page template JSON, and other dependencies. 
+1. `Digital Shadows/` - This contains the package, requirements, ARM JSON file, connector page template JSON, and other dependencies. 
 2. `DigitalShadowsConnectorAzureFunction/` - This contains the Azure function source code along with sample data.
 
 
