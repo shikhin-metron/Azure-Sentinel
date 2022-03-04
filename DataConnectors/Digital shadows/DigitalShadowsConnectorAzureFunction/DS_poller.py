@@ -113,7 +113,7 @@ class poller:
             makes api calls in following fashion:
             triage-events --> triage-items --> incidents and alerts 
         """
-                    
+        item_data = []            
         try:
             #sending data to sentinel
             inc_ids = []
