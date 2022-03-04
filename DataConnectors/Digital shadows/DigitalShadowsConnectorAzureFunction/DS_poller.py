@@ -146,4 +146,7 @@ class poller:
                 #saving event num for next invocation
                 self.date.post_event(max_event_num)
         except Exception:
-            logger.exception("Error polling: ")
+            if(item_data):
+                logger.exception("Error polling: ")
+            else:
+                logger.info("No new events found.")
