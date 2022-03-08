@@ -16,23 +16,23 @@
             "type": "securestring",
             "defaultValue": ""
         },
-        "digitalshadowsAccountID": {
+        "DigitalShadowsAccountID": {
             "type": "securestring",
             "defaultValue": ""
         },
-        "digitalshadowsKey": {
+        "DigitalShadowsKey": {
             "type": "securestring",
             "defaultValue": ""
         },
-        "digitalshadowsSecret": {
+        "DigitalShadowsSecret": {
             "type": "securestring",
             "defaultValue": ""
         },
-        "digitalshadowsUrl": {
+        "DigitalShadowsURL": {
             "type": "string",
             "defaultValue": ""
         },
-        "historicaldays": {
+        "HistoricalDays": {
             "type": "int",
             "defaultValue": 10,
             "metadata": {
@@ -167,11 +167,11 @@
                         "logAnalyticsUri": "[variables('LogAnaltyicsUri')]",
                         "WorkspaceID": "[parameters('WorkspaceID')]",
                         "WorkspaceKey": "[parameters('WorkspaceKey')]",
-                        "digitalshadowsAccountID": "[parameters('digitalshadowsAccountID')]",
-                        "historicaldays": "[parameters('historicaldays')]",
-                        "digitalshadowsKey": "[parameters('digitalshadowsKey')]",
-                        "digitalshadowsSecret": "[parameters('digitalshadowsSecret')]",
-                        "digitalshadowsUrl": "[parameters('digitalshadowsUrl')]",
+                        "DigitalShadowsAccountID": "[parameters('DigitalShadowsAccountID')]",
+                        "HistoricalDays": "[parameters('HistoricalDays')]",
+                        "DigitalShadowsKey": "[parameters('DigitalShadowsKey')]",
+                        "DigitalShadowsSecret": "[parameters('DigitalShadowsSecret')]",
+                        "DigitalShadowsURL": "[parameters('DigitalShadowsURL')]",
                         "WEBSITE_RUN_FROM_PACKAGE": "https://github.com/shikhin-metron/Azure-Sentinel/raw/master/DataConnectors/Digital%20shadows/digitalshadowsConnector.zip"
                     }
                 }
