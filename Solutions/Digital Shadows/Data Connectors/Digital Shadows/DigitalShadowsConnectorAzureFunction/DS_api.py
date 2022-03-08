@@ -21,9 +21,9 @@ class api:
         self.b64val = base64.b64encode(bytes(passkey, 'utf-8')).decode("ascii")
         self.session = requests.Session()
         self.session.headers.update({
-        "Authorization": "Basic %s" % self.b64val,
-        "searchlight-account-id": "%s" % self.id,
-        "User-Agent": "DigitalShadowsAzureSentinelIntegration"
+            "Authorization": "Basic %s" % self.b64val,
+            "searchlight-account-id": "%s" % self.id,
+            "User-Agent": "DigitalShadowsAzureSentinelIntegration"
         })
 
     def get_alerts(self, alert_ids):
@@ -34,8 +34,8 @@ class api:
         alert_url = self.url + "alerts"
         params = dict(id=alert_ids)
         response = self.session.get(alert_url, params=params)
-        logger.info("Alerts response code: %s" % response.status_code)
-        return response
+        response.raise_for_status()
+        return response.json()
 
     def get_incidents(self, incident_ids):
         """ 
@@ -44,8 +44,8 @@ class api:
         incident_url = self.url + "incidents"
         params = dict(id=incident_ids)
         response = self.session.get(incident_url, params=params)
-        logger.info("Incident response code: %s" % response.status_code)
-        return response
+        response.raise_for_status()
+        return response.json()
 
     def get_triage_events(self, before_date, after_date):
         """ 
@@ -55,7 +55,7 @@ class api:
 
         triage_url = self.url + "triage-item-events?limit=20&event-created-before=" + str(before_date) + "&event-created-after=" +  str(after_date)
         response = self.session.get(triage_url)
-        logger.info("Events response code: %s" % response.status_code)
+        response.raise_for_status()
         return response.json()
 
     def get_triage_items(self, triage_ids):
@@ -66,7 +66,7 @@ class api:
         items_url = self.url + "triage-items"
         params = dict(id=triage_ids)
         response = self.session.get(items_url, params=params)
-        logger.info("Triage items response code: %s" % response.status_code)
+        response.raise_for_status()
         return response.json()
 
     def get_triage_comments(self, item_id):
@@ -76,7 +76,7 @@ class api:
 
         items_url = self.url + "triage-items/" + str(item_id) + "/comments"
         response = self.session.get(items_url)
-        logger.info("Comments response code: %s" % response.status_code)
+        response.raise_for_status()
         return response.json()
     
     def get_triage_events_by_num(self, event):
@@ -85,5 +85,5 @@ class api:
         """
         triage_url = self.url + "triage-item-events?limit=20&event-num-after=" + str(event)
         response = self.session.get(triage_url)
-        logger.info("Events by num %d response code: %s" % (event, response.status_code))
+        response.raise_for_status()
         return response.json()

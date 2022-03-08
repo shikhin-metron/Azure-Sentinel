@@ -14,7 +14,7 @@ key = os.environ['DigitalShadowsKey']
 secret = os.environ['DigitalShadowsSecret']
 connection_string = os.environ['AzureWebJobsStorage']
 historical_days = os.environ['HistoricalDays']
-url = os.environ['DigitalShadowsUrl']
+url = os.environ['DigitalShadowsURL']
 
 
 def main(mytimer: func.TimerRequest) -> None:

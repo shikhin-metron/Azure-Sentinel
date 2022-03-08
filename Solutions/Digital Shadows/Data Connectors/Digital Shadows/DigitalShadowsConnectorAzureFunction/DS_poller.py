@@ -39,61 +39,84 @@ class poller:
         return res
 
 
-    def post_azure(self, response, item):
+    def post_azure(self, alerts_and_incidents, triage_items):
         """
             posts to azure after appending triage information on it
         """
-        json_obj = response.json()
-        for i in range(len(json_obj)):
-            comment_data = self.DS_obj.get_triage_comments(item[i]['id'])
-            json_obj[i]['status'] = item[i]['state']
-            json_obj[i]['triage_id'] = item[i]['id']
-            json_obj[i]['triage_raised_time'] = item[i]['raised']
-            json_obj[i]['triage_updated_time'] = item[i]['updated']
+
+        data = {}
+        for item in triage_items:
+            # Getting all the present triage items into the data dict
+            if 'alert-id' in item['source']:
+                data[item['source']['alert-id']] = [item, None]
+            elif 'incident-id' in item['source']:
+                data[item['source']['incident-id']] = [item, None]
+            else:
+                raise Exception(f'Triage item missing expected source ID field: {item}')
+
+        for item in alerts_and_incidents:
+            # Replacing None in the tuple with the incident/alert corresponding to respective triage item. 
+            if item['id'] in data:
+                #changing tuple to list and then back to tuple so that we can map the alert/incident to triage
+                data[item['id']][1] = item
+            else:
+                raise Exception(f'No matching triage item found for alert/incident: {item}')
+
+        for triage_item, alert_or_incident in data.values():
+            # validate we actually have an alert/incident before proceeding
+            if not alert_or_incident:
+                raise Exception(f'Triage item had no matching alert/incident data: {triage_item}')
+            alert_or_incident['status'] = triage_item['state']
+            alert_or_incident['triage_id'] = triage_item['id']
+            alert_or_incident['triage_raised_time'] = triage_item['raised']
+            alert_or_incident['triage_updated_time'] = triage_item['updated']
             
-            comment_data_filtered = []
+            #creating a custom json data to post into azure
+            azure_obj = {
+                **alert_or_incident,
+                'status': triage_item['state'],
+                'triage_id': triage_item['id'],
+                'triage_raised_time': triage_item['raised'],
+                'triage_updated_time': triage_item['updated'],
+                'comments': []
+            }
+
+            comment_data = self.DS_obj.get_triage_comments(triage_item['id'])
+            
             for comment in comment_data:
-                comment['user-name'] = comment['user']['name']
-                del comment['triage-item-id']
-                del comment['updated']
-                del comment['user']
-                if comment['content'] != "":
-                    comment_data_filtered.append(comment)
+                if not comment['content']:
+                    continue
+                azure_obj['comments'].append({
+                    'user_name': comment['user']['name'],
+                    'content': comment['content'],
+                    'id': comment['id'],
+                    'created': comment['created']
+                })
 
 
-            json_obj[i]['comments'] = comment_data_filtered
-            
-            json_obj[i]['description'] = self.parse_desc(json_obj[i]['description'])
-
-            if('id' in json_obj[i] and not isinstance(json_obj[i]['id'], str)):
-                json_obj[i]['description'] = json_obj[i]['description'] + "\n\nSearchlight Portal Link: https://portal-digitalshadows.com/triage/alert-incidents/" + str(json_obj[i]['id'])
-        
-            self.AS_obj.post_data(json.dumps(json_obj[i]), constant.LOG_NAME)
+            self.AS_obj.post_data(json.dumps(azure_obj), constant.LOG_NAME)
 
     def get_data(self):
         """
             getting the incident and alert data from digital shadows
         """
         triage_id = []
+        max_event_num = -1
 
         try:
             if(isinstance(self.event, int)):
                 event_data = self.DS_obj.get_triage_events_by_num(self.event)
                 #calculating the max event number from current batch to  use in next call
-                if(event_data):
+                if event_data:
                     max_event_num = max([e['event-num'] for e in event_data])
 
             else:
                 event_data = self.DS_obj.get_triage_events(self.before_time, self.after_time)
                 #calculating the max event number from current batch to  use in next call
-                if(event_data):
+                if event_data:
                     max_event_num = max([e['event-num'] for e in event_data])
                     logger.info("First poll from event number " + str(event_data[0]['event-num']))
                     logger.info("Total number of events are " + str(len(event_data)))
-                else:
-                    logger.info("There are no new events")
-                    return [], int
-
             
             for event in event_data:
                 if(event is not None and event['triage-item-id'] not in triage_id):
@@ -113,13 +136,13 @@ class poller:
             makes api calls in following fashion:
             triage-events --> triage-items --> incidents and alerts 
         """
-                    
+        item_data = []            
         try:
             #sending data to sentinel
             inc_ids = []
             alert_ids = []
             item_data, max_event_num = self.get_data()
-            if(item_data):
+            if item_data:
                 logger.info("total number of items are " + str(len(item_data)))
                 #creating list of ids by alert and incidents
                 alert_triage_items = list(filter(lambda item: item['source']['alert-id'] is not None, item_data))
@@ -129,21 +152,20 @@ class poller:
                 if inc_triage_items:
                     inc_ids = [item['source']['incident-id'] for item in inc_triage_items]
                     response_inc = self.DS_obj.get_incidents(inc_ids)
-                    if(not 200 <= int(response_inc.status_code) < 300):
-                        raise RuntimeError("Unexpected response from portal while getting incidents. Status code: {}".format(response_inc.status_code))        
                         
                 if alert_triage_items:
                     alert_ids = [item['source']['alert-id'] for item in alert_triage_items]
                     response_alert = self.DS_obj.get_alerts(alert_ids)
-                    if(not 200 <= int(response_alert.status_code) < 300):
-                        raise RuntimeError("Unexpected response from portal while getting alerts. Status code: {}".format(response_alert.status_code))    
                     
                 if inc_triage_items:
                     self.post_azure(response_inc, inc_triage_items)
                 if alert_triage_items:
                     self.post_azure(response_alert, alert_triage_items)
+            else:
+                logger.info("No new events found.")
 
                 #saving event num for next invocation
                 self.date.post_event(max_event_num)
         except Exception:
             logger.exception("Error polling: ")
+            

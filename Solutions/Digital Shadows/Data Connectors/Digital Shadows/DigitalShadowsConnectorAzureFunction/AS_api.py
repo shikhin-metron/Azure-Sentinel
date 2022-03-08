@@ -58,10 +58,8 @@ class logs_api:
 
         response = requests.post(uri,data=body, headers=headers)
         
-        if (response.status_code >= 200 and response.status_code <= 299):
-            logger.info('Accepted')
-        else:
-            response.raise_for_status()
+        response.raise_for_status()
+        logger.info('Accepted')
 
 
             
