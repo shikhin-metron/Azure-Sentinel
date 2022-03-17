@@ -14,7 +14,6 @@ class poller:
         """ 
             initializes all necessary variables from other classes for polling 
         """
-        
         self.DS_obj = DS_api.api(ds_id, ds_key, secret, url)
         self.AS_obj = AS_api.logs_api(as_id, as_key)
         self.date = State(connection_string)
@@ -54,13 +53,6 @@ class poller:
             else:
                 raise Exception(f'Triage item missing expected source ID field: {item}')
 
-        for item in alerts_and_incidents:
-            # Replacing None in the tuple with the incident/alert corresponding to respective triage item. 
-            if item['id'] in data:
-                #changing tuple to list and then back to tuple so that we can map the alert/incident to triage
-                data[item['id']][1] = item
-            else:
-                raise Exception(f'No matching triage item found for alert/incident: {item}')
 
         for triage_item, alert_or_incident in data.values():
             # validate we actually have an alert/incident before proceeding
@@ -96,22 +88,21 @@ class poller:
 
             self.AS_obj.post_data(json.dumps(azure_obj), constant.LOG_NAME)
 
-    def get_data(self):
+    def get_data(self, app_num):
         """
             getting the incident and alert data from digital shadows
         """
         triage_id = []
-        max_event_num = -1
 
         try:
             if(isinstance(self.event, int)):
-                event_data = self.DS_obj.get_triage_events_by_num(self.event)
+                event_data = self.DS_obj.get_triage_events_by_num(self.event, app_num)
                 #calculating the max event number from current batch to  use in next call
                 if event_data:
                     max_event_num = max([e['event-num'] for e in event_data])
 
             else:
-                event_data = self.DS_obj.get_triage_events(self.before_time, self.after_time)
+                event_data = self.DS_obj.get_triage_events(self.before_time, self.after_time, app_num)
                 #calculating the max event number from current batch to  use in next call
                 if event_data:
                     max_event_num = max([e['event-num'] for e in event_data])
@@ -130,7 +121,7 @@ class poller:
         
         return item_data, max_event_num
 
-    def poll(self):
+    def poll(self, app):
         """
             main polling function, 
             makes api calls in following fashion:
@@ -141,7 +132,7 @@ class poller:
             #sending data to sentinel
             inc_ids = []
             alert_ids = []
-            item_data, max_event_num = self.get_data()
+            item_data, max_event_num = self.get_data(app)
             if item_data:
                 logger.info("total number of items are " + str(len(item_data)))
                 #creating list of ids by alert and incidents
@@ -161,8 +152,6 @@ class poller:
                     self.post_azure(response_inc, inc_triage_items)
                 if alert_triage_items:
                     self.post_azure(response_alert, alert_triage_items)
-            else:
-                logger.info("No new events found.")
 
                 #saving event num for next invocation
                 self.date.post_event(max_event_num)
