@@ -39,7 +39,7 @@ class poller:
         return res
 
 
-    def post_azure(self, alerts_and_incidents, triage_items):
+    def post_azure(self, alerts_and_incidents, triage_items, app):
         """
             posts to azure after appending triage information on it
         """
@@ -77,7 +77,8 @@ class poller:
                 'triage_id': triage_item['id'],
                 'triage_raised_time': triage_item['raised'],
                 'triage_updated_time': triage_item['updated'],
-                'comments': []
+                'comments': [],
+                'app': app
             }
 
             comment_data = self.DS_obj.get_triage_comments(triage_item['id'])
@@ -156,9 +157,9 @@ class poller:
                     response_alert = self.DS_obj.get_alerts(alert_ids)
                     
                 if inc_triage_items:
-                    self.post_azure(response_inc, inc_triage_items)
+                    self.post_azure(response_inc, inc_triage_items, app)
                 if alert_triage_items:
-                    self.post_azure(response_alert, alert_triage_items)
+                    self.post_azure(response_alert, alert_triage_items, app)
             else:
                 logger.info("No new events found.")
                 max_event_num = self.event
