@@ -93,6 +93,7 @@ class poller:
             getting the incident and alert data from digital shadows
         """
         triage_id = []
+        max_event_num = None
 
         try:
             if(isinstance(self.event, int)):
