@@ -14,12 +14,13 @@ class poller:
         """ 
             initializes all necessary variables from other classes for polling 
         """
+        
         self.DS_obj = DS_api.api(ds_id, ds_key, secret, url)
         self.AS_obj = AS_api.logs_api(as_id, as_key)
         self.date = State(connection_string)
         logger.info("got inside the poller code")
         self.event = self.date.get_last_event(historical_days)
-        if(isinstance(self.event, tuple)):
+        if isinstance(self.event, tuple):
             self.after_time = self.event[0]
             self.before_time = self.event[1]
             logger.info("From time: %s", self.after_time)
@@ -46,13 +47,19 @@ class poller:
         data = {}
         for item in triage_items:
             # Getting all the present triage items into the data dict
-            if 'alert-id' in item['source']:
+            if 'alert-id' in item['source'] and item['source']['alert-id'] is not None:
                 data[item['source']['alert-id']] = [item, None]
-            elif 'incident-id' in item['source']:
+            elif 'incident-id' in item['source'] and item['source']['incident-id'] is not None:
                 data[item['source']['incident-id']] = [item, None]
             else:
                 raise Exception(f'Triage item missing expected source ID field: {item}')
 
+        for item in alerts_and_incidents:
+            # Replacing None in the list with the incident/alert corresponding to respective triage item. 
+            if item['id'] in data:
+                data[item['id']][1] = item
+            else:
+                raise Exception(f'No matching triage item found for alert/incident: {item}')
 
         for triage_item, alert_or_incident in data.values():
             # validate we actually have an alert/incident before proceeding
@@ -93,32 +100,32 @@ class poller:
             getting the incident and alert data from digital shadows
         """
         triage_id = []
-        max_event_num = None
+        max_event_num = -1
+        item_data = []
+        event_data = []
 
-        try:
-            if(isinstance(self.event, int)):
-                event_data = self.DS_obj.get_triage_events_by_num(self.event, app_num)
-                #calculating the max event number from current batch to  use in next call
-                if event_data:
-                    max_event_num = max([e['event-num'] for e in event_data])
+        if isinstance(self.event, int):
+            event_data = self.DS_obj.get_triage_events_by_num(self.event, app_num)
+            #calculating the max event number from current batch to  use in next call
+            if event_data:
+                max_event_num = max([e['event-num'] for e in event_data])
 
-            else:
-                event_data = self.DS_obj.get_triage_events(self.before_time, self.after_time, app_num)
-                #calculating the max event number from current batch to  use in next call
-                if event_data:
-                    max_event_num = max([e['event-num'] for e in event_data])
-                    logger.info("First poll from event number " + str(event_data[0]['event-num']))
-                    logger.info("Total number of events are " + str(len(event_data)))
-            
-            for event in event_data:
-                if(event is not None and event['triage-item-id'] not in triage_id):
-                    triage_id.append(event['triage-item-id'])
-
-            logger.info(triage_id)
-        except Exception:            
-            logger.exception("Error while getting triage data: ")
+        else:
+            event_data = self.DS_obj.get_triage_events(self.before_time, self.after_time, app_num)
+            #calculating the max event number from current batch to  use in next call
+            if event_data:
+                max_event_num = max([e['event-num'] for e in event_data])
+                logger.info("First poll from event number " + str(event_data[0]['event-num']))
+                logger.info("Total number of events are " + str(len(event_data)))
         
-        item_data = self.DS_obj.get_triage_items(triage_id)
+        for event in event_data:
+            if event is not None and event['triage-item-id'] not in triage_id:
+                triage_id.append(event['triage-item-id'])
+
+        logger.info(triage_id)
+        
+        if triage_id:
+            item_data = self.DS_obj.get_triage_items(triage_id)
         
         return item_data, max_event_num
 
@@ -128,7 +135,6 @@ class poller:
             makes api calls in following fashion:
             triage-events --> triage-items --> incidents and alerts 
         """
-        item_data = []            
         try:
             #sending data to sentinel
             inc_ids = []
@@ -153,6 +159,9 @@ class poller:
                     self.post_azure(response_inc, inc_triage_items)
                 if alert_triage_items:
                     self.post_azure(response_alert, alert_triage_items)
+            else:
+                logger.info("No new events found.")
+                max_event_num = self.event
 
                 #saving event num for next invocation
                 self.date.post_event(max_event_num)
