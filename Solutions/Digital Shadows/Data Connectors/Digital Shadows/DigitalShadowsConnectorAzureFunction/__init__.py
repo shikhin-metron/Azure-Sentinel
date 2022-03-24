@@ -16,8 +16,8 @@ connection_string = os.environ['AzureWebJobsStorage']
 historical_days = os.environ['HistoricalDays']
 url = os.environ['DigitalShadowsURL']
 app = os.environ['Function']
-include = os.environ['Inc']
-exclude = os.environ['Exc']
+include = os.environ['Include']
+exclude = os.environ['Exclude']
 
 
 def main(mytimer: func.TimerRequest) -> None:
