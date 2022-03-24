@@ -47,19 +47,19 @@ class api:
         response.raise_for_status()
         return response.json()
 
-    def get_triage_events(self, before_date, after_date, app_num):
+    def get_triage_events(self, before_date, after_date, app_num, inc_list, exc_list):
         """ 
             function for getting triage events,
             send only the DS converted dates using state serializer functions to get triage events
         """
         if app_num == "app1":
             params = {
-                "classification": ["exposed-credential-alert", "marked-document-alert"],
+                "classification": inc_list,
 
             }
         elif app_num == "app2":
             params = {
-                "classification-exclusion": ["exposed-credential-alert", "marked-document-alert"],
+                "classification-exclusion": exc_list,
 
             }
         triage_url = self.url + "triage-item-events?limit=20&event-created-before=" + str(before_date) + "&event-created-after=" +  str(after_date)
@@ -88,7 +88,7 @@ class api:
         response.raise_for_status()
         return response.json()
     
-    def get_triage_events_by_num(self, event, app_num):
+    def get_triage_events_by_num(self, event, app_num, inc_list, exc_list):
         """
             gets triage events by number
         """
@@ -96,12 +96,12 @@ class api:
         
         if app_num == "app1":
             params = {
-                "classification": ["exposed-credential-alert", "marked-document-alert"],
+                "classification": inc_list,
 
             }
         elif app_num == "app2":
             params = {
-                "classification-exclusion": ["exposed-credential-alert", "marked-document-alert"],
+                "classification-exclusion": exc_list,
 
             }
         

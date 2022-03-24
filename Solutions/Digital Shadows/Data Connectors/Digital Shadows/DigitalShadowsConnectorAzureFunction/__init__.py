@@ -16,6 +16,8 @@ connection_string = os.environ['AzureWebJobsStorage']
 historical_days = os.environ['HistoricalDays']
 url = os.environ['DigitalShadowsURL']
 app = os.environ['Function']
+include = os.environ['Inc']
+exclude = os.environ['Exc']
 
 
 def main(mytimer: func.TimerRequest) -> None:
@@ -28,5 +30,7 @@ def main(mytimer: func.TimerRequest) -> None:
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
     
     DSobj = DS_poller.poller(account_id, key, secret, customer_id, shared_key, connection_string, historical_days, url)
-    
-    DSobj.poll(app)
+    incList = include.split(",")
+    excList = exclude.split(",")
+
+    DSobj.poll(app, incList, excList)

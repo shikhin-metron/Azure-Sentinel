@@ -8,10 +8,18 @@
             "maxLength": 11,
             "type": "string"
         },
+		"Include": {
+            "defaultValue": "",
+            "type": "string"
+        },
 		"FunctionName2": {
             "defaultValue": "DS",
             "minLength": 1,
             "maxLength": 11,
+            "type": "string"
+        },
+		"Exclude": {
+            "defaultValue": "",
             "type": "string"
         },
         "WorkspaceID": {
@@ -174,6 +182,7 @@
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(variables('FunctionName1')),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(variables('FunctionName1'))), '2019-06-01').keys[0].value, ';EndpointSuffix=',toLower(variables('StorageSuffix')))]",
                         "logAnalyticsUri": "[variables('LogAnaltyicsUri')]",
                         "Function": "app1",
+                        "Inc": "[parameters('Include')]",
                         "WorkspaceID": "[parameters('WorkspaceID')]",
                         "WorkspaceKey": "[parameters('WorkspaceKey')]",
                         "DigitalShadowsAccountID": "[parameters('DigitalShadowsAccountID')]",
@@ -342,6 +351,7 @@
                     "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(variables('FunctionName2')),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(variables('FunctionName2'))), '2019-06-01').keys[0].value, ';EndpointSuffix=',toLower(variables('StorageSuffix')))]",
                         "logAnalyticsUri": "[variables('LogAnaltyicsUri')]",
                     "Function": "app2",
+                    "Exc": "[parameters('Exclude')]",
                         "WorkspaceID": "[parameters('WorkspaceID')]",
                         "WorkspaceKey": "[parameters('WorkspaceKey')]",
                         "DigitalShadowsAccountID": "[parameters('DigitalShadowsAccountID')]",
