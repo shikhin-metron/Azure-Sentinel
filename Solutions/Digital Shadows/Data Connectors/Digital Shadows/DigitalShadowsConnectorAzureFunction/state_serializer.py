@@ -25,6 +25,7 @@ class State:
             from which it will poll next time
         """
         try:
+            self.file_cli.upload_file(None)
             self.file_cli.upload_file(marker_text)
         except ResourceNotFoundError:
             self.share_cli.create_share()
@@ -41,16 +42,17 @@ class State:
             return None
 
     def post_event(self, marker_text: int):
-        """ 
-            posts the new time to azure file share file, 
+        """
+            posts the new time to azure file share file,
             from which it will poll next time
         """
-        logger.info(str(marker_text) + " event number stored now")
+
         try:
             self.file_event_cli.upload_file(str(marker_text))
         except ResourceNotFoundError:
             self.share_cli.create_share()
             self.file_event_cli.upload_file(str(marker_text))
+        logger.info(str(marker_text) + " event number stored now")
 
     def get_event(self):
         """ 
@@ -90,6 +92,7 @@ class State:
         try:
             event = int(self.get_event())
         except:
+            logging.info("Could not get event number, getting last stored time")
             event = self.get_last_polled_time(historical_days)
         
         return event
