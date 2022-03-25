@@ -164,8 +164,8 @@ class poller:
                 logger.info("No new events found.")
                 max_event_num = self.event
 
-                #saving event num for next invocation
-                self.date.post_event(max_event_num)
+            #saving event num for next invocation
+            self.date.post_event(max_event_num)
         except Exception:
             logger.exception("Error polling: ")
             

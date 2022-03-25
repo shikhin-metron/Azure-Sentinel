@@ -25,7 +25,6 @@ class State:
             from which it will poll next time
         """
         try:
-            self.file_cli.upload_file(None)
             self.file_cli.upload_file(marker_text)
         except ResourceNotFoundError:
             self.share_cli.create_share()
